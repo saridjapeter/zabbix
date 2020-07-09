@@ -7,4 +7,10 @@ New-Item -Path $conf_file -ItemType File -Force
 Add-content $conf_file "#Version=1.2" 
 Add-content $conf_file "Server=192.168.0.78"
 Add-content $conf_file "ServerActive=192.168.0.78"
+& D:\zabbix\dayLOG.exe
+#& sqlcmd -S .\sqlexpress -U sa -P mssql -Q "set nocount on;SELECT Data FROM ProcessControl.dbo.Config WHERE Category='Main' AND Name='Unique_ID'" -h -1 -f 65001 -o D:\zabbix\hostAD.ini
+$hostAD = Get-Content D:\zabbix\hostAD.ini
+$IP = $values -replace ".*@" -replace ":.*"
+$hostname=
+Add-content $conf_file $hostname
 }
