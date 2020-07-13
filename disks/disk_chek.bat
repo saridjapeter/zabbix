@@ -1,6 +1,5 @@
 rem Создание списка дисков
 @echo off
-md "D:\Zabbix\disks"
 echo @echo off > d:\zabbix\disks\disks.cmd
 echo echo {"data": >> d:\zabbix\disks\disks.cmd
 echo echo    [ >> d:\zabbix\disks\disks.cmd

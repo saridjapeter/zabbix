@@ -1,4 +1,16 @@
-﻿$version = (Get-Content D:\Zabbix\zabbix_agentd.conf)[0] -replace ".*="
+﻿#Проверка прав админа
+param([switch]$Elevated)
+function Check-Admin {
+$currentUser = New-Object Security.Principal.WindowsPrincipal $([Security.Principal.WindowsIdentity]::GetCurrent())
+$currentUser.IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator) }
+if ((Check-Admin) -eq $false)  { 
+    if ($elevated){ # Could not elevate, quit
+} else { 
+    Start-Process powershell.exe -Verb RunAs -ArgumentList ('-noprofile -noexit -file "{0}" -elevated' -f ( $myinvocation.MyCommand.Definition ))
+    } exit
+}
+#install
+$version = (Get-Content D:\Zabbix\zabbix_agentd.conf)[0] -replace ".*="
 $new_version = (Get-Content D:\Zabbix\install.bat)[68] -replace ".*="
 if ($version -lt $new_version) {
 $conf_file="D:\zabbix\zabbix_agentd.conf"
@@ -45,4 +57,19 @@ Add-content $conf_file (Get-Content d:\zabbix\disks\UserParameters.txt)
 & d:\zabbix\disks\smartmontools-7.0-1.win32-setup.exe /S
 #Создание списка дисков
 & D:\zabbix\disks\disk_chek.bat
+#Установка Zabbix службы
+get-service "Zabbix Agent" | where {$_.status -eq 'running'} | stop-service -pass
+(Get-WmiObject win32_service -Filter "name='Zabbix Agent'").delete()
+D:\Zabbix\zabbix_agentd.exe --config D:\Zabbix\zabbix_agentd.conf --install
+start-service "Zabbix Agent" -PassThru
+#-----Zabbix_Update-----
+& SCHTASKS /Create /F /SC DAILY /ST 01:00 /TN Zabbix_Update /TR "D:\zabbix\Update\UPDATE.bat" /ru Brazers /rp Br22013
+#-----/RealTemp/-----
+& SCHTASKS /Create /F /SC onstart /TN RealTemp /TR "D:\Zabbix\RealTemp\RealTemp.exe" /ru Brazers /rp Br22013
+Stop-Process -Name RealTemp
+& D:\Zabbix\RealTemp\RealTemp.exe
+-----/CAM Ping/-----
+
+
+Stop-Process -Name PowerShell
 }
