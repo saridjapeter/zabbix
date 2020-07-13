@@ -10,7 +10,8 @@ Add-content $conf_file "ServerActive=192.168.0.78"
 & D:\zabbix\dayLOG.exe
 #& sqlcmd -S .\sqlexpress -U sa -P mssql -Q "set nocount on;SELECT Data FROM ProcessControl.dbo.Config WHERE Category='Main' AND Name='Unique_ID'" -h -1 -f 65001 -o D:\zabbix\hostAD.ini
 $hostAD = Get-Content D:\zabbix\hostAD.ini
-$IP = $values -replace ".*@" -replace ":.*"
-$hostname=
+$hostAD = $hostAD -split "@"
+$hostname = [string]::Concat("Hostname=", $hostAD[2], "-", $hostAD[1], "-", $hostAD[3])
+Add-content $conf_file $hostname
 Add-content $conf_file $hostname
 }

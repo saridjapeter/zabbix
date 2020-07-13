@@ -1,6 +1,6 @@
-::powershell -executionpolicy RemoteSigned -file "D:\Zabbix\Version.ps1"
+powershell -executionpolicy RemoteSigned -file "D:\Zabbix\Version.ps1"
 @echo off 
-::IF NOT EXIST D:\Zabbix\ver.zbx goto finish
+IF NOT EXIST D:\Zabbix\ver.zbx goto finish
 setlocal enabledelayedexpansion
 
 echo.
@@ -65,8 +65,8 @@ pause
 call :color 6
 call :echo "Set Zabbix server is Zabbix.be2b.ru" 
 
-echo Version=1.1
-set word=#Version=1.1
+echo Version=1.11
+set word=#Version=1.11
 echo %word%>>D:\zabbix\zabbix_agentd.conf
 
 echo Server=192.168.0.78
@@ -499,5 +499,5 @@ exit
   pushd "%~dp0"& <nul>"%~1_" set/p="%%i%%i  "& findstr/a:%c% . "%~1_*"
   (if "%~2" neq "/" echo.)& del "%~1_"& popd& set c=& exit/b
  )   
-::finish
- :exit
+:finish
+ exit
