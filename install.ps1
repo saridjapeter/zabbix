@@ -13,9 +13,9 @@ $hostAD = Get-Content D:\zabbix\hostAD.ini
 $hostAD = $hostAD -split "@"
 $hostname = [string]::Concat("Hostname=", $hostAD[2], "-", $hostAD[1], "-", $hostAD[3])
 Add-content $conf_file $hostname
-Add-content $conf_file "UserParameter=NAME[*],D:\zabbix\info.bat $1"
-Add-content $conf_file "UserParameter=INFO[*],D:\zabbix\$1"
-Add-content $conf_file "UserParameter=CASH[*],call D:\zabbix\KKM.bat $1"
+Add-content $conf_file 'UserParameter=NAME[*],D:\zabbix\info.bat $1'
+Add-content $conf_file 'UserParameter=INFO[*],D:\zabbix\$1'
+Add-content $conf_file 'UserParameter=CASH[*],call D:\zabbix\KKM.bat $1'
 #-----/DETECT VIDEO SYSTEM/-----
 if (Test-Path -Path 'E:\video')
    {
@@ -36,4 +36,13 @@ if (Test-Path -Path 'E:\index')
 }
 Add-content $conf_file "RefreshActiveChecks=60"
 Add-content $conf_file "LogFile=D:\zabbix\zabbix_agentd.log"
+#-----Self_test task-----
+& SCHTASKS /Create /F /SC DAILY /ST 00:00 /TN Self_test /TR "D:\zabbix\dayLOG.exe"
+#-----ArCheck task-----
+& SCHTASKS /Create /F /sc minute /mo 20 /TN ArCheck /TR "D:\zabbix\ArCheck.exe" 
+#-----/S.M.A.R.T./-----
+Add-content $conf_file (Get-Content d:\zabbix\disks\UserParameters.txt)
+& d:\zabbix\disks\smartmontools-7.0-1.win32-setup.exe /S
+#Создание списка дисков
+& D:\zabbix\disks\disk_chek.bat
 }
