@@ -10,8 +10,11 @@ if ((Check-Admin) -eq $false)  {
     } exit
 }
 #install
+if (Test-Path -Path 'D:\Zabbix\zabbix_agentd.conf') {}
+else {New-Item -Path 'D:\Zabbix\zabbix_agentd.conf' -ItemType "file"
+Set-Content $conf_file "#Version=1.1"}
 $version = (Get-Content D:\Zabbix\zabbix_agentd.conf)[0] -replace ".*="
-$new_version = (Get-Content D:\Zabbix\install.bat)[68] -replace ".*="
+$new_version = (Get-Content D:\Zabbix\install.ps1)[68] -replace ".*="
 if ($version -lt $new_version) {
 $conf_file="D:\zabbix\zabbix_agentd.conf"
 New-Item -Path $conf_file -ItemType File -Force
@@ -53,6 +56,7 @@ Add-content $conf_file "LogFile=D:\zabbix\zabbix_agentd.log"
 #-----ArCheck task-----
 & SCHTASKS /Create /F /sc minute /mo 20 /TN ArCheck /TR "D:\zabbix\ArCheck.exe" 
 #-----/S.M.A.R.T./-----
+& robocopy \\192.168.0.6\Distr\SRA\Zabbix\disks "d:\zabbix\disks\" /E /XO /R:3 /W:5 /MT:32
 Add-content $conf_file (Get-Content d:\zabbix\disks\UserParameters.txt)
 & d:\zabbix\disks\smartmontools-7.0-1.win32-setup.exe /S
 #Создание списка дисков
@@ -68,8 +72,9 @@ start-service "Zabbix Agent" -PassThru
 & SCHTASKS /Create /F /SC onstart /TN RealTemp /TR "D:\Zabbix\RealTemp\RealTemp.exe" /ru Brazers /rp Br22013
 Stop-Process -Name RealTemp
 & D:\Zabbix\RealTemp\RealTemp.exe
------/CAM Ping/-----
-
-
+#-----/CAM Ping/-----
+& SCHTASKS /Create /F /SC hourly /TN CAM_Ping /TR "PowerShell.exe -nologo -noninteractive -windowStyle hidden -File D:\Zabbix\CamIPscan\ping.ps1" /ru Brazers /rp Br22013 
+#-----/TEST RUN SERVICE/-----
+get-service "Zabbix Agent" | where {$_.status -eq 'Stopped'} | restart-computer
 Stop-Process -Name PowerShell
 }
